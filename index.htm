@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>BotLearning</title>
+<style>
+#textarea{
+	min-width: 1000px;
+	min-height: 500px;
+}
+</style>
+
+</head>
+<body>
+	<div>
+		<p>caractères : <span id="carac">0</span></p>
+		<input type="button" id="submit" value="Valider">
+	</div>
+
+	<textarea id="textarea"></textarea>
+
+<script>
+const f = {};
+f.AJAX = (e)=>{
+	/*
+		e = {
+			location, type, ready, settings, responseText, error
+		}
+
+	*/
+	var xhr = new XMLHttpRequest();
+
+	if(e.type == "GET"){
+		e.location += "?" + e.settings;
+	}
+
+	xhr.open(e.type, e.location);
+	
+	if(e.type=="POST" && e.json == true){
+		xhr.setRequestHeader("Content-Type", "application/json");
+	}
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState == 4){
+			if(xhr.status == 200 ){
+				if(e.responseText == true){
+					e.ready(xhr.responseText);
+				}else{
+					e.ready(xhr.response);
+				}
+			
+			}else{
+				e.error(xhr.status);
+			}
+		}
+
+	};
+
+	if(e.type == "GET"){
+		xhr.send(null);
+	}
+	else{
+		xhr.send(e.settings);
+	}
+	
+};
+
+var text = document.querySelector("#textarea");
+var carac = document.querySelector("#carac");
+var submit = document.querySelector("#submit");
+
+var liste = [];
+
+text.addEventListener("change", function(e){
+	carac.innerHTML = text.value.length;
+});
+
+
+submit.addEventListener("click", function(e){
+	liste = [];
+	let cache = "";
+	let p = 0;
+	let countWord = 0;
+	for(var i = 0; i < text.value.length; i++){
+		if(text.value[i] == "."){
+			// cas où on a dépassé, on met cette phrase à la suite
+			if(countWord > 2000){
+				p++;
+				liste[p] = cache;
+				countWord = cache.length;
+				cache = "";
+			}else{
+				if(liste[p] == undefined)
+					liste[p] = "";
+				liste[p] += cache;
+			}
+			cache = "";
+		}else{
+			cache += text.value[i];
+			countWord++;
+		}
+	}
+
+});
+
+async function send(){
+	await f.AJAX({
+		location: 'https://discordapp.com/api/webhooks/715322305709998214/5LNqzzSgm069bv7R-bczOIVvpeUmMEqt8RFk3xDNnm2cCL9KuLH_49nRxQVZiwBn3FXY',
+		type: 'POST',
+		settings: '{"content": "Une image a été reçue: http://elitesud.000webhostapp.com/img/' + encodeURIComponent(file.files[0].name) + '"}',
+		json: true,
+		error: (err)=>{console.error(err);},
+		ready: (v)=>{
+			console.log(v);
+		}
+	});
+}
+
+
+</script>
+
+</body>
+</html>
